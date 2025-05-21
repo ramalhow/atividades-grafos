@@ -157,3 +157,29 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
                     print(f"ja viu a aresta {aresta}")    
         search_dfs(V)
         return arvore_dfs
+   
+   def bfs(self, V=""):
+        if not self.existe_rotulo_vertice(V):
+           raise VerticeInvalidoError
+       
+        arvore_bfs = MeuGrafo()
+        arvore_bfs.adiciona_vertice(V)
+        
+        fila = [V]
+        visitados = []
+        
+        while fila:
+            vert_atual = fila.pop(0)
+            arestas_ord = sorted(self.arestas_sobre_vertice(vert_atual))
+              
+            for aresta in arestas_ord:
+                v1 = self.arestas[aresta].v1.rotulo
+                v2 = self.arestas[aresta].v2.rotulo
+
+                vert_oposto = v1 if v1 != vert_atual else v2
+                    
+                if (vert_oposto not in visitados):
+                    visitados.append(self.vertices[vert_oposto])
+                    
+                
+                
