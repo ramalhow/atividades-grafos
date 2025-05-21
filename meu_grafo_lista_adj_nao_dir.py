@@ -1,5 +1,6 @@
 from bibgrafo.grafo_lista_adj_nao_dir import GrafoListaAdjacenciaNaoDirecionado
 from bibgrafo.grafo_errors import *
+from bibgrafo.aresta import Aresta
 
 class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
 
@@ -114,16 +115,45 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
        arestas_esperadas = (n * (n-1)) // 2
 
        return a == arestas_esperadas
-
+   
    def dfs(self, V=""):
-      
-       if not self.existe_rotulo_vertice(V):
+        if not self.existe_rotulo_vertice(V):
            raise VerticeInvalidoError
-      
-       arestas_ord = sorted(self.arestas_sobre_vertice(V))
-      
-       arvore_dfs = MeuGrafo()
-       arvore_dfs.adiciona_vertice(V)
-      
-       for arest in arestas_ord:
-           par = frozenset((self.arestas[arest].v1.rotulo, self.arestas[arest].v2.rotulo))
+       
+        arvore_dfs = MeuGrafo()
+
+        def search_dfs(V="") -> None:
+            if not arvore_dfs.existe_rotulo_vertice(V):
+                arvore_dfs.adiciona_vertice(V)
+                print("add vertice: ", V)
+
+            arestas_ord = sorted(self.arestas_sobre_vertice(V))
+            print(f"arestas sobre o vertice {V}: ", arestas_ord)
+
+            for aresta in arestas_ord:
+                if (not arvore_dfs.existe_rotulo_aresta(aresta)) :
+                    print("aresta nova + vertice não visitado!") 
+
+                    v1 = self.arestas[aresta].v1.rotulo
+                    v2 = self.arestas[aresta].v2.rotulo
+
+                    vert_oposto = v1 if v1 != V else v2
+                    
+                    # evita laços 
+                    if not arvore_dfs.existe_rotulo_vertice(vert_oposto):
+                        print(f"vert oposto a {V}: ", vert_oposto)
+                        arvore_dfs.adiciona_vertice(vert_oposto)
+
+                        #Aresta(aresta, self.arestas[aresta].v1, self.arestas[aresta].v2)
+                        arvore_dfs.adiciona_aresta(self.arestas[aresta])
+                        print(f"add aresta: {aresta}")
+                        
+                        print(f"indo para vert oposto: {vert_oposto}")
+                        print("avançando na recursão")
+                        search_dfs(vert_oposto)
+                    else:
+                        print(f"o vertice {vert_oposto}")
+                else:
+                    print(f"ja viu a aresta {aresta}")    
+        search_dfs(V)
+        return arvore_dfs
