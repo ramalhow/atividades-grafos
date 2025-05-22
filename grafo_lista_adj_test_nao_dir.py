@@ -140,6 +140,50 @@ class TestGrafo(unittest.TestCase):
 
         # Grafos esperados no DFS:
 
+        # grafo da paraíba padrão
+        self.dfs_grafo_pb = MeuGrafo()
+        for v in ["J", "C", "E", "P", "T", "M", "Z"]:
+            self.dfs_grafo_pb.adiciona_vertice(v)
+
+        self.dfs_grafo_pb.adiciona_aresta("a1", "J", "C")
+        self.dfs_grafo_pb.adiciona_aresta("a2", "C", "E")
+        self.dfs_grafo_pb.adiciona_aresta("a4", "P", "C")
+        self.dfs_grafo_pb.adiciona_aresta("a6", "T", "C")
+        self.dfs_grafo_pb.adiciona_aresta("a8", "M", "T")
+        self.dfs_grafo_pb.adiciona_aresta("a9", "T", "Z")
+
+        # grafo paraíba sem paralelas
+        self.dfs_pb_sem_paralelas = MeuGrafo()
+        for v in ["J", "C", "E", "P", "M", "T", "Z"]:
+            self.dfs_pb_sem_paralelas.adiciona_vertice(v)
+
+        self.dfs_pb_sem_paralelas.adiciona_aresta("a1", "J", "C")
+        self.dfs_pb_sem_paralelas.adiciona_aresta("a2", "C", "E")
+        self.dfs_pb_sem_paralelas.adiciona_aresta("a3", "P", "C")
+        self.dfs_pb_sem_paralelas.adiciona_aresta("a4", "T", "C")
+        self.dfs_pb_sem_paralelas.adiciona_aresta("a6", "M", "T")
+        self.dfs_pb_sem_paralelas.adiciona_aresta("a7", "T", "Z")
+
+        # grafo completo
+        self.dfs_g_completo = MeuGrafo()
+        vertices = ["J", "C", "E", "P"]
+        for v in vertices:
+            self.dfs_g_completo.adiciona_vertice(v)
+
+        self.dfs_g_completo.adiciona_aresta("a1", "J", "C")
+        self.dfs_g_completo.adiciona_aresta("a4", "C", "E")
+        self.dfs_g_completo.adiciona_aresta("a6", "E", "P")
+
+        # grafo desconexo
+        self.dfs_desconexo = MeuGrafo()
+        self.dfs_desconexo.adiciona_vertice("A")
+        self.dfs_desconexo.adiciona_vertice("B")
+        self.dfs_desconexo.adiciona_aresta("asd", "A", "B")
+
+        # grafo com laço
+        self.dfs_laco = MeuGrafo()
+        self.dfs_laco.adiciona_vertice("D")
+
     def test_adiciona_aresta(self):
         self.assertTrue(self.g_p.adiciona_aresta("a10", "J", "C"))
         a = Aresta("zxc", self.g_p.get_vertice("C"), self.g_p.get_vertice("Z"))
@@ -320,7 +364,7 @@ class TestGrafo(unittest.TestCase):
         self.assertEqual(self.dfs_pb_sem_paralelas, pb_sem_paralelas)
 
         # grafo completo
-        g_comp = self.g_p_sem_paralelas.dfs("J")
+        g_comp = self.g_c.dfs("J")
         self.assertEqual(g_comp, self.dfs_g_completo)
 
         # grafo desconexo
@@ -328,5 +372,5 @@ class TestGrafo(unittest.TestCase):
         self.assertEqual(g_desconexo, self.dfs_desconexo)
 
         # grafo com laço
-        g_laco = self.g_l4.dfs("D")
+        g_laco = self.g_l3.dfs("D")
         self.assertEqual(g_laco, self.dfs_laco)
