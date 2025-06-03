@@ -374,3 +374,81 @@ class TestGrafo(unittest.TestCase):
         # grafo com laço
         g_laco = self.g_l3.dfs("D")
         self.assertEqual(g_laco, self.dfs_laco)
+
+
+    def test_eh_conexo(self):
+        # Grafo da Paraíba é conexo
+        self.assertTrue(self.g_p.eh_conexo())
+
+        # Grafo sem paralelas também é conexo
+        self.assertTrue(self.g_p_sem_paralelas.eh_conexo())
+
+        # Grafo desconexo
+        self.assertFalse(self.g_d.eh_conexo())
+        self.assertFalse(self.g_d2.eh_conexo())
+
+        # Grafo com 1 vértice é considerado conexo
+        self.assertTrue(self.g_c3.eh_conexo())
+
+    def test_ha_ciclo(self):
+        # Grafo com ciclo (g_p tem paralelas e ciclo)
+        self.assertTrue(self.g_p.ha_ciclo())
+
+        # Grafo sem paralelas e sem ciclo
+        self.assertFalse(self.g_p_sem_paralelas.ha_ciclo())
+
+        # Grafo completo (tem ciclos)
+        self.assertTrue(self.g_c.ha_ciclo())
+        self.assertTrue(self.g_c2.ha_ciclo())
+
+        # Grafo com 1 vértice sem arestas não tem ciclo
+        self.assertFalse(self.g_c3.ha_ciclo())
+
+        # Grafo com laço é um ciclo
+        self.assertTrue(self.g_l1.ha_ciclo())
+        self.assertTrue(self.g_l4.ha_ciclo())
+
+        # Grafo desconexo com aresta única — sem ciclo
+        self.assertFalse(self.g_d.ha_ciclo())
+        self.assertFalse(self.g_d2.ha_ciclo())
+
+    def test_eh_arvore(self):
+        # Grafo válido como árvore
+        folhas = self.g_p_sem_paralelas.eh_arvore()
+        self.assertIsInstance(folhas, list)
+        self.assertEqual(set(folhas), {'J', 'E', 'P', 'Z'})  # grau 1
+
+        # Grafo com ciclo — não é árvore
+        self.assertFalse(self.g_p.eh_arvore())
+        self.assertFalse(self.g_c.eh_arvore())
+        self.assertFalse(self.g_l1.eh_arvore())
+
+        # Grafo desconexo — não é árvore
+        self.assertFalse(self.g_d.eh_arvore())
+        self.assertFalse(self.g_d2.eh_arvore())
+
+        # Grafo com 1 vértice e sem aresta é uma árvore com 1 "folha"
+        self.assertEqual(self.g_c3.eh_arvore(), ['A'])
+
+    def test_eh_bipartido(self):
+        # Grafo sem paralelas (em forma de árvore) é bipartido
+        self.assertTrue(self.g_p_sem_paralelas.eh_bipartido())
+
+        # Grafo da Paraíba tem paralelas e ciclo ímpar — não bipartido
+        self.assertFalse(self.g_p.eh_bipartido())
+
+        # Grafo completo com 3 vértices — tem ciclo ímpar — não bipartido
+        self.assertFalse(self.g_c2.eh_bipartido())
+
+        # Grafo com laço — não pode ser bipartido
+        self.assertFalse(self.g_l1.eh_bipartido())
+        self.assertFalse(self.g_l4.eh_bipartido())
+
+        # Grafo com 1 vértice é bipartido
+        self.assertTrue(self.g_c3.eh_bipartido())
+
+        # Grafo desconexo com vértices isolados — ainda é bipartido
+        self.assertTrue(self.g_d2.eh_bipartido())
+
+        # Grafo com uma aresta (2 vértices) — é bipartido
+        self.assertTrue(self.g_r.eh_bipartido())

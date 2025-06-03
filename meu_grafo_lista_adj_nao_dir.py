@@ -175,3 +175,43 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
                         arvore_bfs.adiciona_aresta(self.arestas[aresta])
 
         return arvore_bfs
+    
+    def eh_conexo(self):
+        dfs = self.dfs(sorted(self.vertices)[0])
+        return len(self.vertices) == len(dfs.vertices)
+
+    def ha_ciclo(self):
+        vert = self.vertices[0].rotulo
+        dfs = self.dfs(vert)
+        return self != dfs
+
+    def eh_arvore(self):
+       if not self.eh_conexo() or self.ha_ciclo():
+           return False
+
+       folhas = [v.rotulo for v in self.vertices if self.grau(v.rotulo) == 1]
+       return folhas
+
+    def eh_bipartido(self):
+        cor = {}
+        for v in self.vertices:
+            rotulo = v.rotulo
+            if rotulo not in cor:
+                fila = list()
+                fila.append(rotulo)
+                cor[rotulo] = 0  # cor 0
+
+                while fila:
+                    atual = fila.pop()
+
+                    for aresta in self.arestas_sobre_vertice(atual):
+                        v1 = self.arestas[aresta].v1.rotulo
+                        v2 = self.arestas[aresta].v2.rotulo
+                        vizinho = v2 if atual == v1 else v1
+
+                        if vizinho not in cor:
+                            cor[vizinho] = 1 - cor[atual]
+                            fila.append(vizinho)
+                        elif cor[vizinho] == cor[atual]:
+                            return False
+        return True
