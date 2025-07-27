@@ -85,52 +85,92 @@ class TestGrafo(unittest.TestCase):
 
         self.g_d2 = GrafoBuilder().tipo(MeuGrafo()).vertices(4).build()
 
+        # Grafo desconexo com parte não bipartida
+        self.grafo_desconexo_bipartido = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                    e := Vertice("E"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, b),
+                    Aresta("a2", b, a),
+                    Aresta("a3", c, d),
+                    Aresta("a4", d, e),
+                    Aresta("a5", e, c),
+                ]
+            )
+            .build()
+        )
+
         # Grafo p\teste de remoção em casta
         self.g_r = GrafoBuilder().tipo(MeuGrafo()).vertices(2).arestas(1).build()
 
         ## Grafos esperados no BFS:
 
-        # grafo da paraíba padrão
-        self.bfs_grafo_pb = MeuGrafo()
-        for v in ["J", "C", "E", "P", "T", "M", "Z"]:
-            self.bfs_grafo_pb.adiciona_vertice(v)
+        # resultado do bfs no grafo da paraíba
+        self.bfs_grafo_pb = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(["J", "C", "E", "P", "T", "M", "Z"])
+            .arestas(
+                [
+                    Aresta("a1", Vertice("J"), Vertice("C")),
+                    Aresta("a2", Vertice("C"), Vertice("E")),
+                    Aresta("a4", Vertice("P"), Vertice("C")),
+                    Aresta("a6", Vertice("T"), Vertice("C")),
+                    Aresta("a7", Vertice("M"), Vertice("C")),
+                    Aresta("a9", Vertice("T"), Vertice("Z")),
+                ]
+            )
+            .build()
+        )
 
-        self.bfs_grafo_pb.adiciona_aresta("a1", "J", "C")
-        self.bfs_grafo_pb.adiciona_aresta("a2", "C", "E")
-        self.bfs_grafo_pb.adiciona_aresta("a4", "P", "C")
-        self.bfs_grafo_pb.adiciona_aresta("a6", "T", "C")
-        self.bfs_grafo_pb.adiciona_aresta("a7", "M", "C")
-        self.bfs_grafo_pb.adiciona_aresta("a9", "T", "Z")
+        # resutado do bfs no grafo paraíba sem paralelas
+        self.bfs_pb_sem_paralelas = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(["J", "C", "E", "P", "M", "T", "Z"])
+            .arestas(
+                [
+                    Aresta("a1", Vertice("J"), Vertice("C")),
+                    Aresta("a2", Vertice("C"), Vertice("E")),
+                    Aresta("a3", Vertice("P"), Vertice("C")),
+                    Aresta("a4", Vertice("T"), Vertice("C")),
+                    Aresta("a5", Vertice("M"), Vertice("C")),
+                    Aresta("a7", Vertice("T"), Vertice("Z")),
+                ]
+            )
+            .build()
+        )
 
-        # grafo paraíba sem paralelas
-        self.bfs_pb_sem_paralelas = MeuGrafo()
-        for v in ["J", "C", "E", "P", "M", "T", "Z"]:
-            self.bfs_pb_sem_paralelas.adiciona_vertice(v)
-
-        self.bfs_pb_sem_paralelas.adiciona_aresta("a1", "J", "C")
-        self.bfs_pb_sem_paralelas.adiciona_aresta("a2", "C", "E")
-        self.bfs_pb_sem_paralelas.adiciona_aresta("a3", "P", "C")
-        self.bfs_pb_sem_paralelas.adiciona_aresta("a4", "T", "C")
-        self.bfs_pb_sem_paralelas.adiciona_aresta("a5", "M", "C")
-        self.bfs_pb_sem_paralelas.adiciona_aresta("a7", "T", "Z")
-
-        # grafo completo
-        self.bfs_g_completo = MeuGrafo()
-        vertices = ["J", "C", "E", "P"]
-        for v in vertices:
-            self.bfs_g_completo.adiciona_vertice(v)
-
-        self.bfs_g_completo.adiciona_aresta("a1", "J", "C")
-        self.bfs_g_completo.adiciona_aresta("a2", "J", "E")
-        self.bfs_g_completo.adiciona_aresta("a3", "J", "P")
-
-        # grafo desconexo
+        # resultado bfs do grafo completo
+        self.bfs_g_completo = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(["J", "C", "E", "P"])
+            .arestas([
+                Aresta("a1", Vertice("J"), Vertice("C")),
+                Aresta("a2", Vertice("J"), Vertice("E")),
+                Aresta("a3", Vertice("J"), Vertice("P"))
+            ])
+            .build()
+        )
+        
+        # resultado bfs do grafo desconexo
         self.bfs_desconexo = MeuGrafo()
         self.bfs_desconexo.adiciona_vertice("A")
         self.bfs_desconexo.adiciona_vertice("B")
         self.bfs_desconexo.adiciona_aresta("asd", "A", "B")
 
-        # grafo com laço
+        # resultado bfs do grafo com laço
         self.bfs_laco = MeuGrafo()
         self.bfs_laco.adiciona_vertice("C")
         self.bfs_laco.adiciona_vertice("A")
@@ -138,7 +178,7 @@ class TestGrafo(unittest.TestCase):
 
         ## Grafos esperados no DFS:
 
-        # grafo da paraíba padrão
+        # resultado bfs do grafo da paraíba padrão
         self.dfs_grafo_pb = MeuGrafo()
         for v in ["J", "C", "E", "P", "T", "M", "Z"]:
             self.dfs_grafo_pb.adiciona_vertice(v)
@@ -150,7 +190,7 @@ class TestGrafo(unittest.TestCase):
         self.dfs_grafo_pb.adiciona_aresta("a8", "M", "T")
         self.dfs_grafo_pb.adiciona_aresta("a9", "T", "Z")
 
-        # grafo paraíba sem paralelas
+        # resultado bfs do grafo paraíba sem paralelas
         self.dfs_pb_sem_paralelas = MeuGrafo()
         for v in ["J", "C", "E", "P", "M", "T", "Z"]:
             self.dfs_pb_sem_paralelas.adiciona_vertice(v)
@@ -162,7 +202,7 @@ class TestGrafo(unittest.TestCase):
         self.dfs_pb_sem_paralelas.adiciona_aresta("a6", "M", "T")
         self.dfs_pb_sem_paralelas.adiciona_aresta("a7", "T", "Z")
 
-        # grafo completo
+        #resultado bfs do  grafo completo
         self.dfs_g_completo = MeuGrafo()
         vertices = ["J", "C", "E", "P"]
         for v in vertices:
@@ -172,15 +212,17 @@ class TestGrafo(unittest.TestCase):
         self.dfs_g_completo.adiciona_aresta("a4", "C", "E")
         self.dfs_g_completo.adiciona_aresta("a6", "E", "P")
 
-        # grafo desconexo
+        # resultado bfs do grafo desconexo
         self.dfs_desconexo = MeuGrafo()
         self.dfs_desconexo.adiciona_vertice("A")
         self.dfs_desconexo.adiciona_vertice("B")
         self.dfs_desconexo.adiciona_aresta("asd", "A", "B")
 
-        # grafo com laço
+        # resultado bfs do grafo com laço
         self.dfs_laco = MeuGrafo()
         self.dfs_laco.adiciona_vertice("D")
+
+        ## Grafos com a subcategoria de Árvores:
 
         # grafos considerados árvores:
         self.g_arvore1 = (
@@ -249,7 +291,7 @@ class TestGrafo(unittest.TestCase):
         )
 
         # grafo sem o mínimo de arestas para ser uma avore válida:
-        self.g_no_min_arest = (
+        self.g_sem_aresta_min = (
             GrafoBuilder()
             .tipo(MeuGrafo())
             .vertices(
@@ -266,6 +308,149 @@ class TestGrafo(unittest.TestCase):
                     Aresta("a2", a, c),
                     Aresta("a3", b, c),
                     Aresta("a4", b, d),
+                ]
+            )
+            .build()
+        )
+
+        ## Grafos bipartidos
+
+        # Grafo com um par de vertices (bipartido simples)
+        self.g_par = GrafoBuilder().tipo(MeuGrafo()).vertices(2).arestas(1).build()
+
+        # Grafo Estrela
+        self.g_estrela = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(["A", "B", "C", "D", "E"])
+            .arestas(
+                [
+                    Aresta("a1", Vertice("C"), Vertice("A")),
+                    Aresta("a2", Vertice("C"), Vertice("B")),
+                    Aresta("a3", Vertice("C"), Vertice("D")),
+                    Aresta("a4", Vertice("C"), Vertice("E")),
+                ]
+            )
+            .build()
+        )
+
+        # Grafo com ciclo par (4 vértices)
+        self.g_ciclo_par = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, b),
+                    Aresta("a2", b, c),
+                    Aresta("a3", c, d),
+                    Aresta("a4", d, a),
+                ]
+            )
+            .build()
+        )
+
+        # Grafo completo bipartido K 3x2
+        self.g_completo_k_3x2 = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    x := Vertice("X"),
+                    y := Vertice("Y"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, x),
+                    Aresta("a2", a, y),
+                    Aresta("a3", b, x),
+                    Aresta("a4", b, y),
+                    Aresta("a5", c, x),
+                    Aresta("a6", c, y),
+                ]
+            )
+            .build()
+        )
+
+        # Grafo disjunto bipartido
+        self.g_disjunto_bipartido = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                    e := Vertice("E"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, b),
+                    Aresta("a2", c, d),
+                    Aresta("a3", d, e),
+                ]
+            )
+            .build()
+        )
+
+        ## Grafos inválidos
+
+        # Grafo triângulo (ciclo ímpar)
+        self.grafo_triangulo = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices([a := Vertice("A"), b := Vertice("B"), c := Vertice("C")])
+            .arestas([Aresta("a1", a, b), Aresta("a2", b, c), Aresta("a3", c, a)])
+            .build()
+        )
+
+        # Grafo de ciclo par com galho
+        self.grafo_ciclo_com_galho = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(6)
+            .arestas(
+                [
+                    Aresta("a1", Vertice("A"), Vertice("D")),
+                    Aresta("a2", Vertice("A"), Vertice("B")),
+                    Aresta("a3", Vertice("D"), Vertice("A")),
+                    Aresta("a4", Vertice("D"), Vertice("C")),
+                    Aresta("a5", Vertice("B"), Vertice("A")),
+                    Aresta("a6", Vertice("B"), Vertice("C")),
+                    Aresta("a7", Vertice("C"), Vertice("D")),
+                    Aresta("a8", Vertice("C"), Vertice("B")),
+                    Aresta("a9", Vertice("E"), Vertice("C")),
+                    Aresta("a10", Vertice("F"), Vertice("E")),
+                    Aresta("a11", Vertice("C"), Vertice("F")),
+                ]
+            )
+            .build()
+        )
+
+        # Grafo com arestas paralelas simples
+        self.grafo_paralela_simples = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(3)
+            .arestas(
+                [
+                    Aresta("a0", Vertice("A"), Vertice("B")),
+                    Aresta("a1", Vertice("B"), Vertice("C")),
+                    Aresta("a2", Vertice("C"), Vertice("A")),
+                    Aresta("a3", Vertice("C"), Vertice("B")),
                 ]
             )
             .build()
@@ -509,7 +694,7 @@ class TestGrafo(unittest.TestCase):
         self.assertFalse(self.g_d2.eh_arvore())
 
         # Grafo com o mínimo de arestas necessárias
-        self.assertFalse(self.g_no_min_arest.eh_arvore())
+        self.assertFalse(self.g_sem_aresta_min.eh_arvore())
 
         ## Grafos válido como árvore
         self.assertTrue(self.g_arvore1.eh_arvore())  # arvore simples
@@ -522,24 +707,43 @@ class TestGrafo(unittest.TestCase):
         self.assertEqual(self.g_c3.eh_arvore(), [])
 
     def test_eh_bipartido(self):
-        # Grafo sem paralelas (em forma de árvore) é bipartido
-        self.assertTrue(self.g_p_sem_paralelas.eh_bipartido())
+        ## Grafos válidos
 
-        # Grafo da Paraíba tem paralelas e ciclo ímpar — não bipartido
-        self.assertFalse(self.g_p.eh_bipartido())
+        # Grafo com um par de vertices (bipartido simples)
+        self.assertTrue(self.g_par.eh_bipartido())
 
-        # Grafo completo com 3 vértices — tem ciclo ímpar — não bipartido
-        self.assertFalse(self.g_c2.eh_bipartido())
+        # Grafo Estrela
+        self.assertTrue(self.g_estrela.eh_bipartido())
 
-        # Grafo com laço — não pode ser bipartido
-        self.assertFalse(self.g_l1.eh_bipartido())
+        # Grafo com ciclo par (4 vértices)
+        self.assertTrue(self.g_ciclo_par.eh_bipartido())
+
+        # Grafo completo bipartido 3x2
+        self.assertTrue(self.g_completo_k_3x2.eh_bipartido())
+
+        # Grafo disjunto bipartido
+        self.assertTrue(self.g_disjunto_bipartido.eh_bipartido())
+
+        ## Grafos inválidos
+
+        # Grafo vazio
+        g_vazio = MeuGrafo()
+        self.assertFalse(g_vazio.eh_bipartido())
+
+        # Grafo com um vértice isolado
+        self.assertFalse(self.g_c3.eh_bipartido())
+
+        # Grafo triângulo (ciclo ímpar)
+        self.assertFalse(self.grafo_triangulo.eh_bipartido())
+
+        # Grafo desconexo com parte não bipartida
+        self.assertFalse(self.grafo_desconexo_bipartido.eh_bipartido())
+
+        # Grafo de ciclo par com galho
+        self.assertFalse(self.grafo_ciclo_com_galho.eh_bipartido())
+
+        # Grafo com laço próprio
         self.assertFalse(self.g_l4.eh_bipartido())
 
-        # Grafo com 1 vértice é bipartido
-        self.assertTrue(self.g_c3.eh_bipartido())
-
-        # Grafo desconexo com vértices isolados — ainda é bipartido
-        self.assertTrue(self.g_d2.eh_bipartido())
-
-        # Grafo com uma aresta (2 vértices) — é bipartido
-        self.assertTrue(self.g_r.eh_bipartido())
+        # Grafo com arestas paralelas
+        self.assertFalse(self.grafo_paralela_simples.eh_bipartido())
