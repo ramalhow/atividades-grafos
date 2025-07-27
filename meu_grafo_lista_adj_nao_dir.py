@@ -1,6 +1,5 @@
 from bibgrafo.grafo_lista_adj_nao_dir import GrafoListaAdjacenciaNaoDirecionado
 from bibgrafo.grafo_errors import VerticeInvalidoError
-from bibgrafo.aresta import Aresta
 
 
 class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
@@ -107,7 +106,6 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
        if self.ha_laco() or self.ha_paralelas():
            return False
 
-       completos = []
        n = len(self.vertices)
        a = len(self.arestas)
 
@@ -218,7 +216,16 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
        return ha_ciclo
 
    def eh_arvore(self):
-       if self.ha_ciclo() or (not self.eh_conexo()):
+       num_verts = len(self.vertices)
+       num_arestas = len(self.arestas)
+
+       # por definição, as arvores devem obdecer as seguintes condições:
+       # - ser acíclico
+       # - ser conexo
+       # - o mínimo de arestas deve ser n-1, com n = número de vertices
+       is_valid = (not self.ha_ciclo()) and (self.eh_conexo()) and (num_arestas >= (num_verts-1)) 
+
+       if not is_valid:
            return False
 
        folhas = list()

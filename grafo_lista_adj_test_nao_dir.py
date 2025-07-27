@@ -1,9 +1,8 @@
 import unittest
-from meu_grafo_lista_adj_nao_dir import *
-import gerar_grafos_teste
+from meu_grafo_lista_adj_nao_dir import MeuGrafo
 from bibgrafo.aresta import Aresta
 from bibgrafo.vertice import Vertice
-from bibgrafo.grafo_errors import *
+from bibgrafo.grafo_errors import ArestaInvalidaError, VerticeInvalidoError
 from bibgrafo.grafo_json import GrafoJSON
 from bibgrafo.grafo_builder import GrafoBuilder
 
@@ -89,7 +88,7 @@ class TestGrafo(unittest.TestCase):
         # Grafo p\teste de remoção em casta
         self.g_r = GrafoBuilder().tipo(MeuGrafo()).vertices(2).arestas(1).build()
 
-        # Grafos esperados no BFS:
+        ## Grafos esperados no BFS:
 
         # grafo da paraíba padrão
         self.bfs_grafo_pb = MeuGrafo()
@@ -137,7 +136,7 @@ class TestGrafo(unittest.TestCase):
         self.bfs_laco.adiciona_vertice("A")
         self.bfs_laco.adiciona_aresta("a1", "C", "A")
 
-        # Grafos esperados no DFS:
+        ## Grafos esperados no DFS:
 
         # grafo da paraíba padrão
         self.dfs_grafo_pb = MeuGrafo()
@@ -182,6 +181,95 @@ class TestGrafo(unittest.TestCase):
         # grafo com laço
         self.dfs_laco = MeuGrafo()
         self.dfs_laco.adiciona_vertice("D")
+
+        # grafos considerados árvores:
+        self.g_arvore1 = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                    e := Vertice("E"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, b),
+                    Aresta("a2", a, c),
+                    Aresta("a3", c, d),
+                    Aresta("a4", c, e),
+                ]
+            )
+            .build()
+        )
+
+        self.g_arvore2 = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                    e := Vertice("E"),
+                    f := Vertice("F"),
+                    g := Vertice("G"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, b),
+                    Aresta("a2", a, c),
+                    Aresta("a3", b, d),
+                    Aresta("a4", b, e),
+                    Aresta("a5", c, f),
+                    Aresta("a6", c, g),
+                ]
+            )
+            .build()
+        )
+
+        self.g_arvore3 = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                ]
+            )
+            .arestas([Aresta("a1", a, b), Aresta("a2", a, c), Aresta("a3", a, d)])
+            .build()
+        )
+
+        # grafo sem o mínimo de arestas para ser uma avore válida:
+        self.g_no_min_arest = (
+            GrafoBuilder()
+            .tipo(MeuGrafo())
+            .vertices(
+                [
+                    a := Vertice("A"),
+                    b := Vertice("B"),
+                    c := Vertice("C"),
+                    d := Vertice("D"),
+                ]
+            )
+            .arestas(
+                [
+                    Aresta("a1", a, b),
+                    Aresta("a2", a, c),
+                    Aresta("a3", b, c),
+                    Aresta("a4", b, d),
+                ]
+            )
+            .build()
+        )
 
     def test_adiciona_aresta(self):
         self.assertTrue(self.g_p.adiciona_aresta("a10", "J", "C"))
@@ -410,22 +498,28 @@ class TestGrafo(unittest.TestCase):
         self.assertFalse(self.g_d.ha_ciclo())
 
     def test_eh_arvore(self):
-        # Grafo válido como árvore
-        folhas = self.g_p_sem_paralelas.eh_arvore()
-        self.assertIsInstance(folhas, list)
-        self.assertEqual(set(folhas), {"J", "E", "P", "Z"})  # grau 1
+        ## Grafos que NÂO são válidos como Árvore:
 
-        # Grafo com ciclo — não é árvore
+        # Grafo com ciclo:
         self.assertFalse(self.g_p.eh_arvore())
-        self.assertFalse(self.g_c.eh_arvore())
-        self.assertFalse(self.g_l1.eh_arvore())
+        self.assertFalse(self.g_p_sem_paralelas.eh_arvore())
 
-        # Grafo desconexo — não é árvore
+        # Grafo desconexo
         self.assertFalse(self.g_d.eh_arvore())
         self.assertFalse(self.g_d2.eh_arvore())
 
-        # Grafo com 1 vértice e sem aresta é uma árvore com 1 "folha"
-        self.assertEqual(self.g_c3.eh_arvore(), ["A"])
+        # Grafo com o mínimo de arestas necessárias
+        self.assertFalse(self.g_no_min_arest.eh_arvore())
+
+        ## Grafos válido como árvore
+        self.assertTrue(self.g_arvore1.eh_arvore())  # arvore simples
+        self.assertTrue(self.g_arvore2.eh_arvore())  # arvore binária
+        self.assertTrue(self.g_arvore3.eh_arvore())  # arvore com 3 folhas (tipo trie)
+
+        # CASO ESPECIAL: Grafo com 1 vértice e sem aresta é uma árvore "trivial",
+        # mas seu único vertice NÃO pode ser considerado uma folha.
+        # logo, deve retornar a lista vazia
+        self.assertEqual(self.g_c3.eh_arvore(), [])
 
     def test_eh_bipartido(self):
         # Grafo sem paralelas (em forma de árvore) é bipartido
