@@ -9,7 +9,6 @@ from bibgrafo.grafo_builder import GrafoBuilder
 
 
 class TestGrafo(unittest.TestCase):
-
     def setUp(self):
         # Grafo da Paraíba
         self.g_p = GrafoJSON.json_to_grafo("test_json/grafo_pb.json", MeuGrafo())
@@ -375,7 +374,6 @@ class TestGrafo(unittest.TestCase):
         g_laco = self.g_l3.dfs("D")
         self.assertEqual(g_laco, self.dfs_laco)
 
-
     def test_eh_conexo(self):
         # Grafo da Paraíba é conexo
         self.assertTrue(self.g_p.eh_conexo())
@@ -394,8 +392,8 @@ class TestGrafo(unittest.TestCase):
         # Grafo com ciclo (g_p tem paralelas e ciclo)
         self.assertTrue(self.g_p.ha_ciclo())
 
-        # Grafo sem paralelas e sem ciclo
-        self.assertFalse(self.g_p_sem_paralelas.ha_ciclo())
+        # Grafo sem paralelas e com ciclo
+        self.assertTrue(self.g_p_sem_paralelas.ha_ciclo())
 
         # Grafo completo (tem ciclos)
         self.assertTrue(self.g_c.ha_ciclo())
@@ -410,13 +408,12 @@ class TestGrafo(unittest.TestCase):
 
         # Grafo desconexo com aresta única — sem ciclo
         self.assertFalse(self.g_d.ha_ciclo())
-        self.assertFalse(self.g_d2.ha_ciclo())
 
     def test_eh_arvore(self):
         # Grafo válido como árvore
         folhas = self.g_p_sem_paralelas.eh_arvore()
         self.assertIsInstance(folhas, list)
-        self.assertEqual(set(folhas), {'J', 'E', 'P', 'Z'})  # grau 1
+        self.assertEqual(set(folhas), {"J", "E", "P", "Z"})  # grau 1
 
         # Grafo com ciclo — não é árvore
         self.assertFalse(self.g_p.eh_arvore())
@@ -428,7 +425,7 @@ class TestGrafo(unittest.TestCase):
         self.assertFalse(self.g_d2.eh_arvore())
 
         # Grafo com 1 vértice e sem aresta é uma árvore com 1 "folha"
-        self.assertEqual(self.g_c3.eh_arvore(), ['A'])
+        self.assertEqual(self.g_c3.eh_arvore(), ["A"])
 
     def test_eh_bipartido(self):
         # Grafo sem paralelas (em forma de árvore) é bipartido

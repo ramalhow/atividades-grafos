@@ -179,11 +179,43 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
    def eh_conexo(self):
        dfs = self.dfs(self.vertices[0].rotulo)
        return len(self.vertices) == len(dfs.vertices)
+   
 
+   # usando o algoritmo Union-Find
    def ha_ciclo(self):
-       vert = self.vertices[0].rotulo
-       dfs = self.dfs(vert)
-       return self != dfs
+       pais = {v.rotulo: v.rotulo for v in self.vertices}
+       ranks = {v.rotulo: 0 for v in self.vertices}
+
+       def find(x):
+           if pais[x] != x:
+               pais[x] = find(pais[x])       
+           return pais[x]
+
+       ha_ciclo = False
+
+       for aresta in self.arestas.values():
+           v1 = aresta.v1.rotulo
+           v2 = aresta.v2.rotulo
+
+           # find
+           pai_v1 = find(v1)
+           pai_v2 = find(v2)
+
+           if pai_v1 == pai_v2:
+               ha_ciclo = True
+               break
+           
+           if ranks[pai_v1] < ranks[pai_v2]:
+               pais[pai_v1] = pai_v2
+
+           elif ranks[pai_v1] > ranks[pai_v2]:
+               pais[pai_v2] = pai_v1
+
+           else:
+               pais[pai_v2] = pai_v1
+               ranks[pai_v1] += 1
+
+       return ha_ciclo
 
    def eh_arvore(self):
        if self.ha_ciclo() or (not self.eh_conexo()):
