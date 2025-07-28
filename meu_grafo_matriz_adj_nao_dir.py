@@ -12,9 +12,10 @@ class MeuGrafo(GrafoMatrizAdjacenciaNaoDirecionado):
         :return: Um conjunto (set) com os pares de vértices não adjacentes
         '''
         nao_adj = set()
+        tam = len(self.matriz)
 
         for linhas in self.matriz:
-            for dicio in linhas:
+            for dicio in range(tam):
 
                 if len(dicio) == 0:
                     for aresta in dicio:
@@ -24,6 +25,8 @@ class MeuGrafo(GrafoMatrizAdjacenciaNaoDirecionado):
 
                         if par not in nao_adj:
                             nao_adj.add(f"{v1}-{v2}")
+                tam = tam - 1
+        return nao_adj
 
     def ha_laco(self):
         '''
