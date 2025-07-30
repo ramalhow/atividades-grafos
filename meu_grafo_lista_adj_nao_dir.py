@@ -268,3 +268,71 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
                         return False
 
         return True
+
+    def vertices_adjacentes(self, V=""):
+        if not self.existe_rotulo_vertice(V):
+            raise VerticeInvalidoError
+
+        arestas_adj = self.arestas_sobre_vertice(V)
+        vertices = []
+
+        for aresta in arestas_adj:
+            a = self.arestas[aresta]
+
+            if a.v1.rotulo == V:
+                vertices.append(a.v2.rotulo)
+            else:
+                vertices.append(a.v1.rotulo)
+
+        return sorted(vertices)
+
+    def dijkstra(self, V="", fim=""):
+        if not self.existe_rotulo_vertice(V):
+            raise VerticeInvalidoError
+
+        for arestas in self.arestas:
+            if arestas.peso < 0:
+                raise Exception(
+                    "Não é possível calcular o menor caminho, há arestas com peso negativo."
+                )
+
+        # define todas as estimativas de distancias como "infinito",
+        # exceto a distancia do v inicial para ele mesmo
+        distancias = {}
+        for v in self.vertices:
+            distancias[v.rotulo] = 0 if v == V else float("inf")
+
+        # inicializa os precendetes com um valor inválido
+        precedentes = {v.rotulo: -1 for v in self.vertices}
+
+        # marca todos os vertices como abertos inicialmente
+        aberto = {v.rotulo: True for v in self.vertices}
+
+        while aberto:
+            # escolha o menor valor de todo o grafo
+            menor_vertice = min(distancias, key=distancias.get)
+
+            # fecha o vertice
+            aberto[menor_vertice] = False
+
+            # encotrando os nós abertos na adjacencia do vertice escolhido:
+            arestas_adj = self.arestas_sobre_vertice(menor_vertice)
+
+            for aresta in arestas_adj:
+                aresta_atual = self.arestas[aresta]
+
+                vertice_adj = (
+                    aresta_atual.v2.rotulo
+                    if aresta_atual.v1.rotulo == V
+                    else aresta_atual.v1.rotulo
+                )
+
+                if aberto[vertice_adj]:
+                    dist_total = distancias[menor_vertice] + aresta_atual.peso
+
+                    if dist_total < distancias[vertice_adj]:
+                        # "relaxa" a aresta == atualiza a distancia estimada/peso da aresta
+                        distancias[vertice_adj] = dist_total
+
+                        # atualiza o precedente
+                        precedentes[vertice_adj] = menor_vertice
