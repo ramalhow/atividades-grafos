@@ -1,5 +1,6 @@
 from bibgrafo.grafo_lista_adj_nao_dir import GrafoListaAdjacenciaNaoDirecionado
 from bibgrafo.grafo_errors import VerticeInvalidoError
+from bibgrafo.vertice import Vertice
 
 
 class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
@@ -221,9 +222,9 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
         # - ser conexo
         # - o mínimo de arestas deve ser n-1, com n = número de vertices
         is_valid = (
-            (not self.ha_ciclo())
-            and (self.eh_conexo())
-            and (num_arestas >= (num_verts - 1))
+                (not self.ha_ciclo())
+                and (self.eh_conexo())
+                and (num_arestas >= (num_verts - 1))
         )
 
         if not is_valid:
@@ -286,12 +287,15 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
 
         return sorted(vertices)
 
-    def dijkstra(self, V="", fim=""):
-        if not self.existe_rotulo_vertice(V):
+    def dijkstra(self, inicio="", fim=""):
+        if not self.existe_rotulo_vertice(inicio):
             raise VerticeInvalidoError
 
-        for arestas in self.arestas:
-            if arestas.peso < 0:
+        if not self.existe_rotulo_vertice(fim):
+            raise VerticeInvalidoError
+
+        for rotulo in self.arestas:
+            if self.arestas[rotulo].peso < 0:
                 raise Exception(
                     "Não é possível calcular o menor caminho, há arestas com peso negativo."
                 )
@@ -300,7 +304,7 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
         # exceto a distancia do v inicial para ele mesmo
         distancias = {}
         for v in self.vertices:
-            distancias[v.rotulo] = 0 if v == V else float("inf")
+            distancias[v.rotulo] = 0 if v.rotulo == inicio else float("inf")
 
         # inicializa os precendetes com um valor inválido
         precedentes = {v.rotulo: -1 for v in self.vertices}
@@ -308,9 +312,18 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
         # marca todos os vertices como abertos inicialmente
         aberto = {v.rotulo: True for v in self.vertices}
 
-        while aberto:
-            # escolha o menor valor de todo o grafo
-            menor_vertice = min(distancias, key=distancias.get)
+        # enquanto houver vertices abertos, vamos rodar o algoritmo
+        while any(aberto.values()):
+
+            # escolha o menor valor de todo o grafo, desde que esteja aberto o vertice
+            menor_vertice = min(
+                (d for d in distancias if aberto[d]),
+                key=lambda d: distancias[d],
+                default=None
+            )
+
+            if menor_vertice is None:
+                break
 
             # fecha o vertice
             aberto[menor_vertice] = False
@@ -323,7 +336,7 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
 
                 vertice_adj = (
                     aresta_atual.v2.rotulo
-                    if aresta_atual.v1.rotulo == V
+                    if aresta_atual.v1.rotulo == menor_vertice
                     else aresta_atual.v1.rotulo
                 )
 
@@ -336,3 +349,29 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
 
                         # atualiza o precedente
                         precedentes[vertice_adj] = menor_vertice
+
+        # construindo o caminho
+        menor_caminho = MeuGrafo()
+
+        v_atual = fim
+        v_prox = precedentes[v_atual]
+
+        while v_atual != -1:
+
+            # inclui os vertices de acordo com a lista de precedencia
+            menor_caminho.adiciona_vertice(v_atual)
+            menor_caminho.adiciona_vertice(v_prox)
+
+            # inclui a aresta que eles estão presentes:
+            arestas_vizinhas = self.arestas_sobre_vertice(v_atual)
+
+            for rotulo_aresta in arestas_vizinhas:
+                aresta = self.arestas[rotulo_aresta]
+
+                if aresta.v1 == v_prox and aresta.v2 == v_atual:
+                    menor_caminho.adiciona_aresta(aresta.rotulo, Vertice(v_prox), Vertice(v_atual), aresta.peso)
+
+            v_atual = v_prox
+            v_prox = precedentes[v_atual]
+
+        return menor_caminho
