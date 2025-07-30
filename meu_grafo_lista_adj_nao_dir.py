@@ -249,7 +249,7 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
 
             while fila:
                 vert = fila.pop(0)
- 
+
                 for aresta in self.arestas_sobre_vertice(vert):
                     a = self.arestas[aresta]
 

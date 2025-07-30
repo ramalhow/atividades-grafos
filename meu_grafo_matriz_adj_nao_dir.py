@@ -11,22 +11,16 @@ class MeuGrafo(GrafoMatrizAdjacenciaNaoDirecionado):
         Onde X, Z e W são vértices no grafo que não tem uma aresta entre eles.
         :return: Um conjunto (set) com os pares de vértices não adjacentes
         '''
-        nao_adj = set()
-        tam = len(self.matriz)
-
-        for linhas in self.matriz:
-            for dicio in range(tam):
+        nao_adj = list()
+        for linha in self.matriz:
+            for dicio in linha:
 
                 if len(dicio) == 0:
                     for aresta in dicio:
                         v1 = aresta.v1.rotulo
                         v2 = aresta.v2.rotulo
-                        par = frozenset((v1, v2))
-
-                        if par not in nao_adj:
-                            nao_adj.add(f"{v1}-{v2}")
-                tam = tam - 1
-        return nao_adj
+                        nao_adj.append(f"{v1}-{v2}")
+        return set(nao_adj)
 
     def ha_laco(self):
         '''
