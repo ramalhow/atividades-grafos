@@ -1,9 +1,10 @@
 import unittest
 from bibgrafo.aresta import ArestaDirecionada
+from bibgrafo.vertice import Vertice
 from bibgrafo.grafo_errors import VerticeInvalidoError, ArestaInvalidaError
 from bibgrafo.grafo_json import GrafoJSON
 from bibgrafo.grafo_builder import GrafoBuilder
-from meu_grafo_matriz_adj_dir import *
+from meu_grafo_matriz_adj_dir import MeuGrafo
 
 class TestGrafo(unittest.TestCase):
 

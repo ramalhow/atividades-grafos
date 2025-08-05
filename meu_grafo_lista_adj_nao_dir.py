@@ -288,9 +288,7 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
         return sorted(vertices)
 
     def dijkstra(self, inicio="", fim=""):
-        if not self.existe_rotulo_vertice(inicio) or not self.existe_rotulo_vertice(
-            fim
-        ):
+        if not self.existe_rotulo_vertice(inicio) or not self.existe_rotulo_vertice(fim):
             raise VerticeInvalidoError
 
         for rotulo in self.arestas:
