@@ -222,9 +222,9 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
         # - ser conexo
         # - o mínimo de arestas deve ser n-1, com n = número de vertices
         is_valid = (
-                (not self.ha_ciclo())
-                and (self.eh_conexo())
-                and (num_arestas >= (num_verts - 1))
+            (not self.ha_ciclo())
+            and (self.eh_conexo())
+            and (num_arestas >= (num_verts - 1))
         )
 
         if not is_valid:
@@ -288,10 +288,9 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
         return sorted(vertices)
 
     def dijkstra(self, inicio="", fim=""):
-        if not self.existe_rotulo_vertice(inicio):
-            raise VerticeInvalidoError
-
-        if not self.existe_rotulo_vertice(fim):
+        if not self.existe_rotulo_vertice(inicio) or not self.existe_rotulo_vertice(
+            fim
+        ):
             raise VerticeInvalidoError
 
         for rotulo in self.arestas:
@@ -302,76 +301,76 @@ class MeuGrafo(GrafoListaAdjacenciaNaoDirecionado):
 
         # define todas as estimativas de distancias como "infinito",
         # exceto a distancia do v inicial para ele mesmo
-        distancias = {}
-        for v in self.vertices:
-            distancias[v.rotulo] = 0 if v.rotulo == inicio else float("inf")
-
+        distancias = {v.rotulo: float("inf") for v in self.vertices}
+        distancias[inicio] = 0
+        
         # inicializa os precendetes com um valor inválido
-        precedentes = {v.rotulo: -1 for v in self.vertices}
-
+        precedentes = {v.rotulo: None for v in self.vertices}
+        
         # marca todos os vertices como abertos inicialmente
-        aberto = {v.rotulo: True for v in self.vertices}
+        aberto = {v.rotulo for v in self.vertices}
+        fechado = set()
 
-        # enquanto houver vertices abertos, vamos rodar o algoritmo
-        while any(aberto.values()):
-
+        while aberto:
             # escolha o menor valor de todo o grafo, desde que esteja aberto o vertice
-            menor_vertice = min(
-                (d for d in distancias if aberto[d]),
-                key=lambda d: distancias[d],
-                default=None
-            )
+            menor_vertice = min(aberto, key=lambda v: distancias[v])
+            
+            # atualiza as listas de vertices abertos e fechados
+            aberto.remove(menor_vertice)
+            fechado.add(menor_vertice)
 
-            if menor_vertice is None:
+            # se chegamos ao destino, podemos parar
+            if menor_vertice == fim:
                 break
 
-            # fecha o vertice
-            aberto[menor_vertice] = False
+            # atualiza distâncias dos vizinhos
+            for aresta_rotulo in self.arestas_sobre_vertice(menor_vertice):
+                aresta = self.arestas[aresta_rotulo]
+                
+                # acha o vertice vizinho
+                if aresta.v1.rotulo == menor_vertice:
+                    vizinho = aresta.v2.rotulo
+                else:
+                    vizinho = aresta.v1.rotulo
 
-            # encotrando os nós abertos na adjacencia do vertice escolhido:
-            arestas_adj = self.arestas_sobre_vertice(menor_vertice)
+                # Ignora vértices já fechados
+                if vizinho in fechado:
+                    continue
 
-            for aresta in arestas_adj:
-                aresta_atual = self.arestas[aresta]
+                dist_total = distancias[menor_vertice] + aresta.peso
+                if dist_total < distancias[vizinho]:
+                    distancias[vizinho] = dist_total
+                    precedentes[vizinho] = menor_vertice
 
-                vertice_adj = (
-                    aresta_atual.v2.rotulo
-                    if aresta_atual.v1.rotulo == menor_vertice
-                    else aresta_atual.v1.rotulo
-                )
+        # conferindo se existe menor caminho
+        if precedentes[fim] is None and inicio != fim:
+            return None  # Não há caminho
 
-                if aberto[vertice_adj]:
-                    dist_total = distancias[menor_vertice] + aresta_atual.peso
+        caminho = MeuGrafo()
+        atual = fim
 
-                    if dist_total < distancias[vertice_adj]:
-                        # "relaxa" a aresta == atualiza a distancia estimada/peso da aresta
-                        distancias[vertice_adj] = dist_total
+        # incluí os vertices no caminho
+        while atual is not None:
+            caminho.adiciona_vertice(atual)
+            atual = precedentes[atual]
 
-                        # atualiza o precedente
-                        precedentes[vertice_adj] = menor_vertice
+        # incluía as arestas no caminho
+        atual = fim
+        while precedentes[atual] is not None:
+            anterior = precedentes[atual]
+            
+            # Encontra a aresta entre atual e anterior
+            aresta_encontrada = None
+            for aresta_rotulo in self.arestas_sobre_vertice(atual):
+                aresta = self.arestas[aresta_rotulo]
+                if (aresta.v1.rotulo == atual and aresta.v2.rotulo == anterior) or (
+                    aresta.v1.rotulo == anterior and aresta.v2.rotulo == atual
+                ):
+                    aresta_encontrada = aresta
+                    break
 
-        # construindo o caminho
-        menor_caminho = MeuGrafo()
+            if aresta_encontrada:
+                caminho.adiciona_aresta(aresta_encontrada)
+            atual = anterior
 
-        v_atual = fim
-        v_prox = precedentes[v_atual]
-
-        while v_atual != -1:
-
-            # inclui os vertices de acordo com a lista de precedencia
-            menor_caminho.adiciona_vertice(v_atual)
-            menor_caminho.adiciona_vertice(v_prox)
-
-            # inclui a aresta que eles estão presentes:
-            arestas_vizinhas = self.arestas_sobre_vertice(v_atual)
-
-            for rotulo_aresta in arestas_vizinhas:
-                aresta = self.arestas[rotulo_aresta]
-
-                if aresta.v1 == v_prox and aresta.v2 == v_atual:
-                    menor_caminho.adiciona_aresta(aresta.rotulo, Vertice(v_prox), Vertice(v_atual), aresta.peso)
-
-            v_atual = v_prox
-            v_prox = precedentes[v_atual]
-
-        return menor_caminho
+        return caminho
